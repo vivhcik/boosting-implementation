@@ -4,7 +4,7 @@ import numpy as np
 class RegressionTree:
     '''
     Класс RegressionTree решает задачу регрессии.
-    Основная логика: деление на поддеревья на основе уменьшения ошибки.
+    деление на поддеревья на основе уменьшения ошибки.
     '''
 
     def __init__(self, max_depth=3, min_size=8):
@@ -26,58 +26,51 @@ class RegressionTree:
         '''
         Обучение дерева на данных X (матрица признаков) и y (целевая переменная).
         '''
-        # Подсказка: начните с вычисления базового значения self.value и ошибки.
-        self.value = np.mean(y)  # Найдите среднее значение y
-        base_error = self.__mse(self.value, y) # Вычислите сумму квадратов разностей для y и self.value
+        self.value = np.mean(y) 
+        base_error = self.__mse(self.value, y)
 
-        error = base_error  # Ошибка до разбиения
-        flag = 0            # Флаг, показывает, найдено ли хорошее разбиение
+        error = base_error  
+        flag = 0            # найдено ли хорошее разбиение
 
         prev_error_left = base_error
         prev_error_right = 0
 
-        # Подсказка: добавьте условие для проверки выхода из рекурсии
-        if self.max_depth <= 1:  # Условие: если достигнута максимальная глубина
+        if self.max_depth <= 1:  # достигнута максимальная глубина
             return
 
         # Перебор признаков
         dim_shape = X.shape[1]
         for feat in range(dim_shape):
-            # Подсказка: отсортируйте индексы по значениям признака feat
             idxs = np.argsort(X[:, feat])
 
             # количество сэмплов в левом и правом поддереве
             N = X.shape[0]
-            N1, N2 = N, 0  # Левое и правое поддеревья (размеры)
+            N1, N2 = N, 0  # Левое и правое поддеревья
             thres = 1
 
             while thres < N - 1:
-                # Подсказка: обновите размеры поддеревьев
                 N1 -= 1
                 N2 += 1
 
                 idx = idxs[thres]
                 x = X[idx, feat]
 
-                # Пропустите одинаковые значения признаков
+                # пропуск одинаковых значений признаков
                 if thres < N - 1 and x == X[idxs[thres + 1], feat]:
                     thres += 1
                     continue
 
-                # Подсказка: разделите данные на левое и правое поддеревья
                 target_right = y[idxs][:thres]
                 target_left = y[idxs][thres:]
 
-                # Подсказка: найдите средние значения для потомков
                 mean_right = np.mean(target_right)
                 mean_left = np.mean(target_left)
 
-                # Подсказка: вычислите ошибки в левом и правом поддеревьях
                 prev_error_left = N1 / N * self.__mse(target_left, mean_left)
                 prev_error_right = N2 / N * self.__mse(target_right, target_right)
                 loss_func = prev_error_left + prev_error_right
                 
-                # Подсказка: обновите параметры разбиения, если нашли лучшее
+                # обновление параметров, если нашли лучшее
                 if (loss_func < error) and (min(N1, N2) > self.min_size):
                     self.feature_idx = feat
                     self.feature_threshold = x
@@ -88,17 +81,16 @@ class RegressionTree:
 
                 thres += 1
 
-        # Подсказка: если разбиение не найдено, завершите обучение
+        # если разбиение не найдено
         if self.feature_idx == -1:
             return
 
-        # Подсказка: создайте левое и правое поддеревья
         self.left = RegressionTree(self.max_depth - 1)
         self.left.value = left_value
         self.right = RegressionTree(self.max_depth - 1)
         self.right.value = right_value
 
-        # Подсказка: разделите данные по индексу и обучите потомков
+        #  разделите данные по индексу и обучите потомков
         idxs_l = (X[:, self.feature_idx] > self.feature_threshold)
         idxs_r = (X[:, self.feature_idx] <= self.feature_threshold)
         self.left.fit(X[idxs_l, :], y[idxs_l])
@@ -108,11 +100,10 @@ class RegressionTree:
         '''
         Рекурсивное предсказание для одного примера.
         '''
-        # Подсказка: если нет потомков, вернуть значение листа
+        # если нет потомков, вернуть значение листа
         if self.feature_idx == -1:
             return self.value
 
-        # Подсказка: выберите левое или правое поддерево
         if x[self.feature_idx] > self.feature_threshold:
             return self.left.__predict(x)
         else:
@@ -124,7 +115,6 @@ class RegressionTree:
         '''
         y = np.zeros(X.shape[0])
 
-        # Подсказка: вызовите __predict() для каждой строки
         for i in range(X.shape[0]):
             y[i] = self.__predict(X[i])
 
