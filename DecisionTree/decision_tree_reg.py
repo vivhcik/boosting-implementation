@@ -2,22 +2,18 @@ import numpy as np
 
 
 class RegressionTree:
-    '''
-    Класс RegressionTree решает задачу регрессии.
-    деление на поддеревья на основе уменьшения ошибки.
-    '''
 
     def __init__(self, max_depth=3, min_size=8):
         '''
         Инициализация параметров дерева.
         '''
-        self.max_depth = max_depth # максимальная глубина дерева
-        self.min_size = min_size   # минимальный размер поддерева min_samples_split
-        self.value = 0             # значение в листе дерева
-        self.feature_idx = -1      # индекс признака для разбиения
-        self.feature_threshold = 0 # значение признака для разбиения
-        self.left = None           # левое поддерево
-        self.right = None          # правое поддерево
+        self.max_depth = max_depth 
+        self.min_size = min_size   
+        self.value = 0             
+        self.feature_idx = -1       
+        self.feature_threshold = 0  
+        self.left = None           
+        self.right = None          
 
     def __mse(self, y_true, y_pred):
         return np.mean((y_true - y_pred)**2)
@@ -30,20 +26,19 @@ class RegressionTree:
         base_error = self.__mse(self.value, y)
 
         error = base_error  
-        flag = 0            # найдено ли хорошее разбиение
+        flag = 0            
 
         prev_error_left = base_error
         prev_error_right = 0
 
-        if self.max_depth <= 1:  # достигнута максимальная глубина
+        if self.max_depth <= 1:  
             return
 
-        # Перебор признаков
+        
         dim_shape = X.shape[1]
         for feat in range(dim_shape):
             idxs = np.argsort(X[:, feat])
 
-            # количество сэмплов в левом и правом поддереве
             N = X.shape[0]
             N1, N2 = N, 0  # Левое и правое поддеревья
             thres = 1
@@ -90,11 +85,12 @@ class RegressionTree:
         self.right = RegressionTree(self.max_depth - 1)
         self.right.value = right_value
 
-        #  разделите данные по индексу и обучите потомков
         idxs_l = (X[:, self.feature_idx] > self.feature_threshold)
         idxs_r = (X[:, self.feature_idx] <= self.feature_threshold)
         self.left.fit(X[idxs_l, :], y[idxs_l])
         self.right.fit(X[idxs_r, :], y[idxs_r])
+        
+        return self
 
     def __predict(self, x):
         '''

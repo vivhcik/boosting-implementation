@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 from sklearn.tree import DecisionTreeRegressor
 from decision_tree_reg import RegressionTree
 from sklearn.metrics import mean_squared_error
+from sklearn.model_selection import train_test_split
 
 def main():
 
@@ -10,11 +11,10 @@ def main():
     X = np.random.rand(100, 1) * 10
     y = 2 * X.flatten() + 3 + np.random.randn(100) * 2 
 
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
     
-    X_train, X_test = X[:80], X[80:]
-    y_train, y_test = y[:80], y[80:]
 
-    dtr = DecisionTreeRegressor()
+    dtr = DecisionTreeRegressor(max_depth=10, min_samples_split=2)
     dtr.fit(X_train, y_train)
     dtr_pred = dtr.predict(X_test)
     print(mean_squared_error(y_test, dtr_pred))
@@ -23,12 +23,6 @@ def main():
     tree.fit(X_train, y_train)
     tree_pred = tree.predict(X_test)
     print(mean_squared_error(y_test, tree_pred))
-    print(mean_squared_error(y_test, [y_test.mean() for _ in range(len(y_test))]))
-    
-    plt.scatter(X_test, y_test)
-    plt.scatter(X_test, tree_pred)
-    plt.scatter(X_test, dtr_pred)
-    plt.show()
     
 
 main()
